@@ -271,7 +271,6 @@ class ChatScreenState extends State<ChatScreen> {
                       },
                     ),
                   ),
-                  _buildQuickReplies(),
                   _buildMessageInput(),
                 ],
               ),
@@ -345,35 +344,6 @@ class ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuickReplies() {
-    final suggestions = [
-      LocalizationService.tr('suggest_clothes'),
-      LocalizationService.tr('suggest_kurtas'),
-      LocalizationService.tr('suggest_trending'),
-    ];
-
-    return Container(
-      height: 45,
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: suggestions.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ActionChip(
-              label: Text(suggestions[index], style: const TextStyle(fontSize: 12, color: Colors.white)),
-              backgroundColor: const Color(0xFFFF8C00).withOpacity(0.8),
-              onPressed: () => sendInitialQuery(suggestions[index]),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            ),
-          );
-        },
       ),
     );
   }

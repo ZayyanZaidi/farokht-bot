@@ -13,6 +13,20 @@ class AppNavShell extends StatefulWidget {
 class _AppNavShellState extends State<AppNavShell> {
   int _currentIndex = 0;
   final GlobalKey<ChatScreenState> _chatKey = GlobalKey<ChatScreenState>();
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeScreen(
+        onStartChat: () => _switchToChat(),
+        onCategoryTap: (cat) => _switchToChat(initialQuery: cat),
+      ),
+      ChatScreen(key: _chatKey),
+      SettingsScreen(onClearChat: _clearChatHistory),
+    ];
+  }
 
   void _switchToChat({String? initialQuery}) {
     setState(() => _currentIndex = 1);
@@ -29,31 +43,11 @@ class _AppNavShellState extends State<AppNavShell> {
 
   @override
   Widget build(BuildContext context) {
-    final screens = [
-      HomeScreen(
-        onStartChat: () => _switchToChat(),
-        onCategoryTap: (cat) => _switchToChat(initialQuery: cat),
-      ),
-      ChatScreen(key: _chatKey),
-      SettingsScreen(onClearChat: _clearChatHistory),
-    ];
 
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.05),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          );
-        },
-        child: screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
       ),
       bottomNavigationBar: Container(
         height: 85,

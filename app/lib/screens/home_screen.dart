@@ -35,6 +35,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+    // Delay initial load to let network stabilize
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        _loadStats();
+        _startAutoRefresh();
+      }
+    });
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -42,16 +50,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    _loadStats();
-    _startAutoRefresh();
   }
 
   void _startAutoRefresh() {
     _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (_isOnline) {
-        _loadStats(isAuto: true);
-      }
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _loadStats(isAuto: true);
     });
   }
 
@@ -70,25 +74,42 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     if (!isAuto && mounted) setState(() => _isLoading = true);
     
     try {
-      final healthy = await ApiService.isServerHealthy();
-      final stats = await ApiService.getStats();
-      final products = await ApiService.getProducts(limit: 20);
+      bool healthy = false;
+      try { healthy = await ApiService.isServerHealthy(); } catch (_) {}
+
+      Map<String, dynamic> stats = {'product_count': 0, 'categories': []};
+      try { stats = await ApiService.getStats(); } catch (_) {}
+
+      List<Product> products = [];
+      try { products = await ApiService.getProducts(limit: 20); } catch (_) {}
+
+      List<Map<String, dynamic>> logs = [];
+      try { logs = await ApiService.getLiveActivity(); } catch (_) {}
       
-      // Extract categories from products if needed
+      // Extract categories from products for variety
       final Map<String, int> catMap = {};
       for (var p in products) {
-        final cats = p.category.split(', ');
-        for (var c in cats) {
-          if (c.isNotEmpty) catMap[c] = (catMap[c] ?? 0) + 1;
+        final catsList = p.category.split(', ');
+        for (var c in catsList) {
+          final trimmed = c.trim();
+          if (trimmed.isNotEmpty) catMap[trimmed] = (catMap[trimmed] ?? 0) + 1;
         }
       }
-      final cats = catMap.entries.map((e) => {'name': e.key, 'count': e.value}).toList();
       
-      final logs = await ApiService.getLiveActivity();
+      List<Map<String, dynamic>> cats = catMap.entries.map((e) => {
+        'name': e.key, 
+        'count': e.value
+      }).toList();
+      
+      // If no products were found, use categories from stats
+      if (cats.isEmpty && stats['categories'] != null) {
+        final List<dynamic> statCats = stats['categories'] as List;
+        cats = statCats.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+      }
       
       if (mounted) {
         setState(() {
-          _isOnline = healthy;
+          _isOnline = healthy || products.isNotEmpty || stats['status'] == 'healthy';
           _productCount = stats['product_count'] ?? 0;
           _allProducts = products;
           _featuredProducts = products.take(5).toList();
@@ -99,7 +120,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isOnline = false);
+      print('HomeScreen: Unexpected error in _loadStats: $e');
+      if (mounted) setState(() {
+        _isOnline = false;
+        _isLoading = false;
+      });
     }
   }
 
@@ -197,16 +222,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             _buildOnlineStatus(),
             const Spacer(),
             Text(
-              '$_productCount items synced',
+              '$_productCount items available',
               style: TextStyle(
                 color: Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white70, 
                 fontSize: 12, 
                 fontWeight: FontWeight.bold
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.sync_rounded, color: Colors.white, size: 20),
-              onPressed: _triggerSync,
             ),
           ],
         ),
@@ -325,9 +346,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             children: [
               const Icon(Icons.inventory_2_outlined, color: Colors.grey, size: 60),
               const SizedBox(height: 16),
-              Text('No products available yet', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
-              const SizedBox(height: 8),
-              TextButton(onPressed: _triggerSync, child: const Text('Sync Now', style: TextStyle(color: Color(0xFFFF8C00)))),
+              Text('Searching for products...', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
             ],
           ),
         ),
@@ -417,7 +436,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             overflow: TextOverflow.ellipsis
                           ),
                           const SizedBox(height: 4),
-                          Text('Rs. ${p.price}', style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text(
+                            p.price > 0 ? 'Rs. ${p.price.toStringAsFixed(0)}' : 'Price on Request', 
+                            style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 12)
+                          ),
                         ],
                       ),
                     ),
@@ -747,26 +769,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Tap the cloud sync icon above to fetch products',
+                        'Pull down to refresh catalog',
                         style: TextStyle(color: Colors.white54, fontSize: 11),
                       ),
-                      if (!_isLoading) ...[
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 32,
-                          child: ElevatedButton.icon(
-                            onPressed: _triggerSync,
-                            icon: const Icon(Icons.sync, size: 14),
-                            label: const Text('Sync Now', style: TextStyle(fontSize: 11)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF8C00),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 )
@@ -956,14 +961,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-              ),
+              _isOnline 
+                ? Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle))
+                : const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey)),
             ],
           ),
         ),
@@ -978,9 +978,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           child: _logs.isEmpty
               ? Center(
-                  child: Text(
-                    'No recent activity',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.sync_problem_rounded, color: Colors.grey[400], size: 30),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isLoading ? 'Fetching activity...' : 'Server unreachable',
+                        style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                      ),
+                    ],
                   ),
                 )
               : ListView.separated(
@@ -1115,18 +1122,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Future<void> _triggerSync() async {
-    final success = await ApiService.triggerSync();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? 'Sync started...' : 'Sync failed'),
-          backgroundColor: success ? Colors.green : Colors.red,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
 }
 
 extension WidgetEntryExtension on Widget {

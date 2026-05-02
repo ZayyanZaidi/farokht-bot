@@ -15,14 +15,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final TextEditingController _urlController = TextEditingController();
   String _selectedLang = 'auto';
   bool _notifications = true;
   bool _isDarkMode = false;
-  bool _isSyncing = false;
-  bool _isServerHealthy = false;
-  bool _isCheckingHealth = false;
-  Map<String, dynamic>? _syncProgress;
 
   @override
   void initState() {
@@ -33,38 +28,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _urlController.text = ApiService.baseUrl;
       _selectedLang = prefs.getString('lang_preference') ?? 'auto';
       _notifications = prefs.getBool('notifications') ?? true;
       _isDarkMode = prefs.getBool('is_dark_mode') ?? false;
     });
-    _checkHealth();
-  }
-
-  Future<void> _checkHealth() async {
-    setState(() => _isCheckingHealth = true);
-    final healthy = await ApiService.isServerHealthy();
-    if (mounted) {
-      setState(() {
-        _isServerHealthy = healthy;
-        _isCheckingHealth = false;
-      });
-    }
-  }
-
-  Future<void> _saveUrl() async {
-    await ApiService.setBaseUrl(_urlController.text.trim());
-    _checkHealth();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Server URL updated'),
-          backgroundColor: const Color(0xFF5CE1E6),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
-    }
   }
 
   Future<void> _saveLang(String langCode, AppLanguage lang) async {
@@ -76,44 +43,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  Future<void> _triggerSync() async {
-    setState(() => _isSyncing = true);
-    final success = await ApiService.triggerSync();
-    
-    if (success) {
-      // Start polling for status
-      _pollSyncStatus();
-    } else {
-      if (mounted) {
-        setState(() => _isSyncing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sync failed — is the server running?'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _pollSyncStatus() async {
-    while (_isSyncing) {
-      final status = await ApiService.getSyncStatus();
-      if (!mounted) break;
-      
-      setState(() {
-        _syncProgress = status;
-        if (status['status'] == 'completed' || status['status'] == 'error') {
-          _isSyncing = false;
-        }
-      });
-      
-      if (!_isSyncing) break;
-      await Future.delayed(const Duration(seconds: 2));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +51,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _buildHeader(),
             const SizedBox(height: 8),
-            _buildServerSection(),
             _buildLanguageSection(),
             _buildNotificationsSection(),
             _buildDataSection(),
@@ -190,107 +118,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildServerSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Server Connection', Icons.cloud_outlined),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.light ? 0.04 : 0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Status row
-              Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: _isCheckingHealth
-                          ? Colors.amber
-                          : (_isServerHealthy ? const Color(0xFF4CAF50) : Colors.red),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _isCheckingHealth
-                        ? 'Checking...'
-                        : (_isServerHealthy ? 'Connected' : 'Disconnected'),
-                    style: TextStyle(
-                      color: _isCheckingHealth
-                          ? Colors.amber[800]
-                          : (_isServerHealthy ? const Color(0xFF4CAF50) : Colors.red),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _checkHealth,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF5CE1E6).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'Test',
-                        style: TextStyle(
-                          color: Color(0xFF5CE1E6),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              // URL input
-              TextField(
-                controller: _urlController,
-                style: const TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  labelText: 'Server URL',
-                  labelStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
-                  hintText: 'http://10.0.2.2:8000',
-                  hintStyle: TextStyle(color: Colors.grey[300]),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFF5CE1E6), width: 2),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.save_rounded, color: Color(0xFFFF8C00)),
-                    onPressed: _saveUrl,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildLanguageSection() {
     return Column(
@@ -452,25 +279,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: const Color(0xFF5CE1E6).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: _isSyncing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF5CE1E6)),
-                        )
-                      : const Icon(Icons.sync_rounded, color: Color(0xFF5CE1E6), size: 20),
+                  child: const Icon(Icons.info_outline_rounded, color: Color(0xFF5CE1E6), size: 20),
                 ),
-                title: const Text('Sync Products', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                subtitle: Text(
-                  _isSyncing 
-                    ? 'Syncing... ${_syncProgress?['progress'] ?? 0}/${_syncProgress?['total_pages'] ?? '?'}' 
-                    : 'Fetch latest from Farokht API', 
-                  style: TextStyle(fontSize: 12, color: _isSyncing ? const Color(0xFF5CE1E6) : Colors.grey[500])
+                title: const Text('Auto-Sync Enabled', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                subtitle: const Text(
+                  'Products are automatically synced from the cloud backend.', 
+                  style: TextStyle(fontSize: 12, color: Colors.grey)
                 ),
-                trailing: _isSyncing 
-                  ? Text('${_syncProgress?['items_synced'] ?? 0} items', style: const TextStyle(fontSize: 11, color: Colors.grey))
-                  : const Icon(Icons.chevron_right, color: Colors.grey),
-                onTap: _isSyncing ? null : _triggerSync,
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
               ListTile(
@@ -587,7 +402,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
-    _urlController.dispose();
     super.dispose();
   }
 }

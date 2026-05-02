@@ -32,7 +32,7 @@ def sync_page(page, limit):
                 'brand': item.get('user', {}).get('brandName', 'Unknown') if item.get('user') else 'Unknown',
                 'name': item.get('title', 'Unknown Product'),
                 'sku': str(item.get('postId', '')),
-                'price': float(item.get('price')) if item.get('price') is not None else 0.0,
+                'price': float(item.get('price') or item.get('sellingPrice') or item.get('regularPrice') or 0.0),
                 'color': ', '.join(item.get('colors', [])) if item.get('colors') else '',
                 'category': ', '.join([c.get('name', '') for c in item.get('categories', [])]) if item.get('categories') else '',
                 'image_url': item.get('image', '')

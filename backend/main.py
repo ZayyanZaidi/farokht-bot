@@ -112,12 +112,18 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    """Automatically sync products on server startup."""
-    from sync_api import fetch_and_sync_posts
-    add_log("🚀 Server starting - Auto-sync initiated", "system")
-    # Run in thread to not block startup
-    thread = threading.Thread(target=fetch_and_sync_posts, daemon=True)
-    thread.start()
+    """Automatically sync products on server startup if DB is empty."""
+    from database import get_product_count
+    count = get_product_count()
+    
+    if count < 100:  # Threshold for initial sync
+        from sync_api import fetch_and_sync_posts
+        add_log(f"🚀 Server starting - Initial sync initiated (Current count: {count})", "system")
+        # Run in thread to not block startup
+        thread = threading.Thread(target=fetch_and_sync_posts, daemon=True)
+        thread.start()
+    else:
+        add_log(f"✅ Server starting - Database stable ({count} products)", "system")
 
 class Product(BaseModel):
     id: str
@@ -204,8 +210,15 @@ def detect_intent(message: str) -> str:
     
     # Check for search-related keywords first (these have priority)
     search_keywords = ["looking for", "show me", "find", "do you have", "can you", "which", 
-                       "what are", "recommend", "trending", "discount", "sale", "similar"]
-    if any(keyword in msg_lower for keyword in search_keywords):
+                       "what are", "recommend", "trending", "discount", "sale", "similar",
+                       "dikhao", "chahiye", "hai", "milega", "mil jayega", "dikhayein", 
+                       "shoppers", "search", "talaash", "dhundo"]
+    clothing_keywords = [
+        "dikhao", "chahiye", "search", "find", "looking for", "collection", 
+        "kurta", "suit", "dress", "shirt", "lawn", "kapray", "joray", "unstitched",
+        "pret", "formal", "wedding", "shaadi", "shadi", "partywear", "kameez", "shalwar"
+    ]
+    if any(keyword in msg_lower for keyword in search_keywords) or any(keyword in msg_lower for keyword in clothing_keywords):
         return "search"
     
     # If no search keywords, check for other intents (only if message is short)
@@ -295,6 +308,33 @@ def generate_custom_response(message: str, products: List[dict], lang: str = "au
             "trending": "یہ ابھی پاکستان میں ٹریند کر رہے ہیں! 🔥",
             "similar": "یہ اسی طرح کی پروڈکٹس ہیں جو آپ کو پسند آ سکتی ہیں:",
             "price_filter": "یہاں آپ کے بجٹ میں پروڈکٹس ہیں:"
+        },
+        "ur_roman": {
+            "greeting": [
+                "Assalam-o-Alaikum! 👋 Farokht mein khush amdeed. Aaj aap kya dhoondna chahte hain?",
+                "Hi! Main aapki behtreen products dhoondne mein madad kar sakta hoon."
+            ],
+            "thanks": [
+                "Aap ka bohat shukriya! Agar mazeed kuch chahiye to zaroor batayein. 😊",
+                "Anytime! Mazeed madad ke liye be-jhijhak puchein."
+            ],
+            "bot": "Main Farokht AI hoon, aapka personal shopping assistant. Main Pakistan ke behtreen products aur deals dhoondne mein madad kar sakta hoon!",
+            "help": "Aap 'kurtay', 'bags' ya kisi khas brand ke liye search kar sakte hain. Main price filter mein bhi madad kar sakta hoon!",
+            "search_intros": [
+                "Shandar! Maine aapke liye kuch behtreen options dhoonday hain:",
+                "Perfect! Yeh raha jo maine dhoonda:",
+                "Zabardast pasand! Inhein dekhein:"
+            ],
+            "search_outros": [
+                "Kya aap mazeed options dekhna chahte hain?",
+                "Kya main aapki mazeed madad kar sakta hoon?",
+                "Kya aap in mein se koi cart mein add karna chahte hain?"
+            ],
+            "not_found": "Maaf kijiye, mujhe woh nahi mila jo aap dhoond rahe hain. Kisi aur product ya brand ke liye try karein!",
+            "discount": "Behtreen! Yahan aapke liye discount wali cheezein hain:",
+            "trending": "Yeh abhi Pakistan mein trending hain! 🔥",
+            "similar": "Yeh milti julti products hain jo aapko pasand aa sakti hain:",
+            "price_filter": "Yahan aapke budget mein products hain:"
         }
     }
     

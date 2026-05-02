@@ -18,7 +18,7 @@ def normalize_query(query: str) -> str:
     """Handles plurals and common synonyms for Pakistani e-commerce."""
     query = query.lower().strip()
     
-    # Plural to singular mapping
+    # Plural to singular and synonym mapping
     plurals = {
         "kurtas": "kurta",
         "shoes": "shoe",
@@ -31,8 +31,16 @@ def normalize_query(query: str) -> str:
         "clothes": "apparel",
         "clothing": "apparel",
         "dresses": "apparel",
+        "suit": "apparel",
+        "suits": "apparel",
+        "kapray": "apparel",
+        "joray": "apparel",
         "products": "product",
-        "brands": "brand"
+        "brands": "brand",
+        "shadi": "wedding",
+        "shaadi": "wedding",
+        "partywear": "formal",
+        "collection": ""
     }
     
     words = query.split()
@@ -167,14 +175,15 @@ def search_similar_products(query: str, n_results: int = 5):
         # For trending - return varied/popular items
         return get_best_sellers(n_results=n_results)
     
-    # Define broad mappings
+    # Define broad mappings for Pakistani E-commerce
     broad_mappings = {
-        "apparel": ["kurta", "socks", "shoes", "dress"],
-        "jewelry": ["bracelet", "jewelry", "jhumka", "earring"],
-        "food": ["snack", "dessert", "bites", "chocolate"],
-        "haircare": ["shampoo", "conditioner", "hair", "oil"],
-        "skincare": ["cream", "serum", "skincare", "lotion", "face"],
-        "footwear": ["shoe", "sandal", "slipper", "boot"]
+        "apparel": ["kurta", "socks", "shoes", "dress", "suit", "kameez", "shalwar", "lawn", "unstitched", "stitched", "pret", "shirt"],
+        "jewelry": ["bracelet", "jewelry", "jhumka", "earring", "necklace", "ring", "bangle", "nauratan"],
+        "food": ["snack", "dessert", "bites", "chocolate", "cookie", "brownie", "cake"],
+        "haircare": ["shampoo", "conditioner", "hair", "oil", "serum"],
+        "skincare": ["cream", "serum", "skincare", "lotion", "face", "wash", "moisturizer"],
+        "footwear": ["shoe", "sandal", "slipper", "boot", "khussa", "kohlapuri"],
+        "wedding": ["formal", "luxury", "chiffon", "embroidered", "bridal", "partywear"]
     }
     
     # 1. Get vector search results
@@ -191,7 +200,8 @@ def search_similar_products(query: str, n_results: int = 5):
     # 2. Smart Category Filtering
     categories = ["kurta", "bag", "dessert", "snack", "jewelry", "cosmetics", "shoes", "socks", 
                   "bracelet", "apparel", "shampoo", "skincare", "haircare", "cream", "serum",
-                  "jhumka", "sandal", "lotion", "oil", "conditioner"]
+                  "jhumka", "sandal", "lotion", "oil", "conditioner", "suit", "shirt", "lawn",
+                  "unstitched", "pret", "khussa", "wedding", "formal", "kameez", "shalwar"]
     detected_cat = next((cat for cat in categories if cat in query_lower), None)
     
     if detected_cat:
