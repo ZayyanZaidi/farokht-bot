@@ -148,20 +148,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [const Color(0xFF5CE1E6), const Color(0xFF5CE1E6).withOpacity(0)],
+              colors: [
+                const Color(0xFF5CE1E6).withOpacity(0.2), 
+                const Color(0xFF5CE1E6).withOpacity(0)
+              ],
             ),
           ),
         ),
       ),
       title: Container(
         height: 45,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4)),
-          ],
-        ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFF5CE1E6).withOpacity(0.2)),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
+          ),
         child: TextField(
           decoration: InputDecoration(
             hintText: 'Search products on Farokht...',
@@ -194,7 +198,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             const Spacer(),
             Text(
               '$_productCount items synced',
-              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.light ? Colors.black54 : Colors.white70, 
+                fontSize: 12, 
+                fontWeight: FontWeight.bold
+              ),
             ),
             IconButton(
               icon: const Icon(Icons.sync_rounded, color: Colors.white, size: 20),
@@ -315,9 +323,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           padding: const EdgeInsets.all(40),
           child: Column(
             children: [
-              const Icon(Icons.inventory_2_outlined, color: Colors.white24, size: 60),
+              const Icon(Icons.inventory_2_outlined, color: Colors.grey, size: 60),
               const SizedBox(height: 16),
-              const Text('No products available yet', style: TextStyle(color: Colors.white54)),
+              Text('No products available yet', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
               const SizedBox(height: 8),
               TextButton(onPressed: _triggerSync, child: const Text('Sync Now', style: TextStyle(color: Color(0xFFFF8C00)))),
             ],
@@ -352,18 +360,42 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Theme.of(context).cardColor.withOpacity(Theme.of(context).brightness == Brightness.light ? 0.9 : 0.08),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+                  boxShadow: Theme.of(context).brightness == Brightness.light 
+                    ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]
+                    : [],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                          image: DecorationImage(image: NetworkImage(p.imageUrl), fit: BoxFit.cover),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        child: Image.network(
+                          p.imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -374,7 +406,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         children: [
                           Text(p.brand, style: TextStyle(color: const Color(0xFF5CE1E6), fontSize: 10, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 2),
-                          Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            p.name, 
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 13, 
+                              color: Theme.of(context).colorScheme.onSurface
+                            ), 
+                            maxLines: 1, 
+                            overflow: TextOverflow.ellipsis
+                          ),
                           const SizedBox(height: 4),
                           Text('Rs. ${p.price}', style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 12)),
                         ],
@@ -431,9 +472,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         width: 100,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Theme.of(context).brightness == Brightness.light 
+            ? Colors.white 
+            : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: color.withOpacity(0.2)),
+          boxShadow: Theme.of(context).brightness == Brightness.light 
+            ? [BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]
+            : [],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

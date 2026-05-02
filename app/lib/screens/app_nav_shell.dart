@@ -56,25 +56,26 @@ class _AppNavShellState extends State<AppNavShell> {
         child: screens[_currentIndex],
       ),
       bottomNavigationBar: Container(
+        height: 85,
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, -4)),
+            BoxShadow(
+              color: const Color(0xFF5CE1E6).withOpacity(0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
           ],
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
         ),
         child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
+          borderRadius: BorderRadius.circular(30),
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (i) => setState(() => _currentIndex = i),
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
             selectedItemColor: const Color(0xFFFF8C00),
             unselectedItemColor: Colors.grey[400],
             selectedFontSize: 12,
@@ -83,15 +84,39 @@ class _AppNavShellState extends State<AppNavShell> {
             elevation: 0,
             items: [
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 0 ? Icons.home_rounded : Icons.home_outlined),
+                icon: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _currentIndex == 0 ? const Color(0xFFFF8C00).withOpacity(0.1) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(_currentIndex == 0 ? Icons.home_rounded : Icons.home_outlined),
+                ),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 1 ? Icons.chat_bubble_rounded : Icons.chat_bubble_outline),
+                icon: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _currentIndex == 1 ? const Color(0xFFFF8C00).withOpacity(0.1) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(_currentIndex == 1 ? Icons.chat_bubble_rounded : Icons.chat_bubble_outline),
+                ),
                 label: 'Chat',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 2 ? Icons.settings_rounded : Icons.settings_outlined),
+                icon: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _currentIndex == 2 ? const Color(0xFFFF8C00).withOpacity(0.1) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(_currentIndex == 2 ? Icons.settings_rounded : Icons.settings_outlined),
+                ),
                 label: 'Settings',
               ),
             ],

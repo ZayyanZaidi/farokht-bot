@@ -38,7 +38,7 @@ class FarokhtBotApp extends StatelessWidget {
               brightness: Brightness.light,
             ),
             textTheme: GoogleFonts.poppinsTextTheme(),
-            scaffoldBackgroundColor: const Color(0xFFE0FFFF),
+            scaffoldBackgroundColor: const Color(0xFFF8FAFC), // Cleaner light background
             useMaterial3: true,
           ),
           darkTheme: ThemeData(
