@@ -99,6 +99,17 @@ class ApiService {
     }
   }
 
+  /// Get current sync status from backend
+  static Future<Map<String, dynamic>> getSyncStatus() async {
+    try {
+      final response = await http.get(Uri.parse('$_baseUrl/sync_status'));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (_) {}
+    return {'status': 'error', 'items_synced': 0, 'progress': 0, 'total_pages': 0};
+  }
+
   /// Health check
   static Future<bool> isServerHealthy() async {
     try {

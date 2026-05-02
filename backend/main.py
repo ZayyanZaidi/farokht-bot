@@ -29,10 +29,24 @@ app.add_middleware(
 )
 
 @app.get("/", response_class=HTMLResponse)
-async def root():
+    from sync_api import sync_status
+    
     count = get_product_count()
     status_color = "#4CAF50" if count > 0 else "#FF8C00"
     
+    sync_html = f"""
+    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+        <div style="font-size: 14px; opacity: 0.7;">SYNC STATUS</div>
+        <div style="font-size: 20px; font-weight: bold; color: {'#4CAF50' if sync_status['status'] == 'completed' else '#5CE1E6'}">
+            {sync_status['status'].upper()}
+        </div>
+        <div style="font-size: 12px; margin-top: 5px;">
+            Items: {sync_status['items_synced']} | Progress: {sync_status['progress']}/{sync_status['total_pages']}
+        </div>
+        {f'<div style="color: #ff4d4d; font-size: 11px; margin-top: 5px;">Error: {sync_status["last_error"]}</div>' if sync_status["last_error"] else ''}
+    </div>
+    """
+
     logs_html = "".join([
         f'<div style="margin-bottom: 8px; font-size: 13px; color: #fff; opacity: 0.8;">'
         f'<span style="color: #5CE1E6;">[{log["time"]}]</span> {log["event"]}</div>'
@@ -82,9 +96,15 @@ async def root():
                 </div>
                 <div class="label">Total Products Synced</div>
                 <div class="count">{count}</div>
+                {sync_html}
                 <div class="label">Latest Activity</div>
                 <div class="logs">{logs_html}</div>
-                <a href="/debug_sync" class="btn">View Raw Data</a>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <a href="/debug_sync" class="btn">View Raw Data</a>
+                    <form action="/sync_trigger" method="post" style="display: inline;">
+                        <button type="submit" class="btn" style="border: none; cursor: pointer; background: #5CE1E6;">Force Sync</button>
+                    </form>
+                </div>
             </div>
         </body>
     </html>
@@ -163,6 +183,15 @@ async def trigger_sync():
     except Exception as e:
         add_log(f"Failed to start sync: {str(e)}", "error")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/sync_status")
+async def get_sync_status():
+    """Returns the current progress of the background sync."""
+    from sync_api import sync_status
+    return {
+        **sync_status,
+        "product_count": get_product_count()
+    }
 
 @app.get("/live_activity")
 async def get_live_activity():

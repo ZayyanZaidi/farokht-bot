@@ -22,6 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isSyncing = false;
   bool _isServerHealthy = false;
   bool _isCheckingHealth = false;
+  Map<String, dynamic>? _syncProgress;
 
   @override
   void initState() {
@@ -78,16 +79,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _triggerSync() async {
     setState(() => _isSyncing = true);
     final success = await ApiService.triggerSync();
-    if (mounted) {
-      setState(() => _isSyncing = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? 'Product sync started!' : 'Sync failed — is the server running?'),
-          backgroundColor: success ? const Color(0xFF4CAF50) : Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+    
+    if (success) {
+      // Start polling for status
+      _pollSyncStatus();
+    } else {
+      if (mounted) {
+        setState(() => _isSyncing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sync failed — is the server running?'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _pollSyncStatus() async {
+    while (_isSyncing) {
+      final status = await ApiService.getSyncStatus();
+      if (!mounted) break;
+      
+      setState(() {
+        _syncProgress = status;
+        if (status['status'] == 'completed' || status['status'] == 'error') {
+          _isSyncing = false;
+        }
+      });
+      
+      if (!_isSyncing) break;
+      await Future.delayed(const Duration(seconds: 2));
     }
   }
 
@@ -438,8 +461,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       : const Icon(Icons.sync_rounded, color: Color(0xFF5CE1E6), size: 20),
                 ),
                 title: const Text('Sync Products', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                subtitle: Text('Fetch latest from Farokht API', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                subtitle: Text(
+                  _isSyncing 
+                    ? 'Syncing... ${_syncProgress?['progress'] ?? 0}/${_syncProgress?['total_pages'] ?? '?'}' 
+                    : 'Fetch latest from Farokht API', 
+                  style: TextStyle(fontSize: 12, color: _isSyncing ? const Color(0xFF5CE1E6) : Colors.grey[500])
+                ),
+                trailing: _isSyncing 
+                  ? Text('${_syncProgress?['items_synced'] ?? 0} items', style: const TextStyle(fontSize: 11, color: Colors.grey))
+                  : const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _isSyncing ? null : _triggerSync,
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),

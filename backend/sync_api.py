@@ -9,6 +9,17 @@ BASE_URL = "https://svc-frkt-app-x8d4k2.farokht.store/api/v1/ml/datasets"
 
 from concurrent.futures import ThreadPoolExecutor
 
+# Global sync state for visibility
+sync_status = {
+    "status": "idle", # idle, syncing, completed, error
+    "progress": 0,
+    "total_pages": 0,
+    "items_synced": 0,
+    "last_error": None,
+    "start_time": None,
+    "end_time": None
+}
+
 def sync_page(page, limit):
     url = f"{BASE_URL}/posts?page={page}&limit={limit}"
     try:
@@ -30,28 +41,46 @@ def sync_page(page, limit):
         count = len(items)
         if count > 0:
             add_log(f"✅ Synced page {page} ({count} items)", "sync")
+            sync_status["items_synced"] += count
+            sync_status["progress"] += 1
         return count
     except Exception as e:
-        add_log(f"❌ Error syncing page {page}: {str(e)[:50]}", "error")
+        error_msg = str(e)[:100]
+        add_log(f"❌ Error syncing page {page}: {error_msg}", "error")
+        sync_status["last_error"] = f"Page {page}: {error_msg}"
         print(f"Error syncing page {page}: {e}")
         return 0
 
 def fetch_and_sync_posts(limit=250):
+    from datetime import datetime
     print("Starting concurrent sync for posts...")
+    
+    sync_status["status"] = "syncing"
+    sync_status["start_time"] = datetime.now().strftime("%H:%M:%S")
+    sync_status["items_synced"] = 0
+    sync_status["progress"] = 0
+    sync_status["last_error"] = None
+    
     # 1. Fetch first page to see if there's more
     first_page_count = sync_page(1, limit)
     if first_page_count < limit:
         print(f"Synced {first_page_count} products (only 1 page found).")
+        sync_status["status"] = "completed"
+        sync_status["end_time"] = datetime.now().strftime("%H:%M:%S")
+        sync_status["total_pages"] = 1
         return
 
-    # 2. Fetch more pages in parallel (assuming there are more)
-    # Since we don't know the exact total, we'll fetch a reasonable batch
-    max_pages = 50 # Increased for a much deeper catalog
+    # 2. Fetch more pages in parallel
+    max_pages = 50 
+    sync_status["total_pages"] = max_pages
+    
     with ThreadPoolExecutor(max_workers=8) as executor:
         pages = range(2, max_pages + 1)
         results = list(executor.map(lambda p: sync_page(p, limit), pages))
     
     total = first_page_count + sum(results)
+    sync_status["status"] = "completed"
+    sync_status["end_time"] = datetime.now().strftime("%H:%M:%S")
     add_log(f"🎉 Sync completed! Total items: {total}", "system")
     print(f"Concurrent sync completed. Total synced: ~{total}")
 
