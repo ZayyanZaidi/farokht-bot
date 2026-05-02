@@ -3,6 +3,7 @@ import json
 import random
 import threading
 import re
+import asyncio
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -113,11 +114,26 @@ async def root():
 
 @app.on_event("startup")
 async def startup_event():
-    """Automatically sync products on server startup if DB is empty."""
+    """Setup background tasks and initial sync."""
     from database import get_product_count
     count = get_product_count()
     
-    if count < 100:  # Threshold for initial sync
+    # 1. Start background auto-sync task (every 6 hours)
+    async def auto_sync_loop():
+        while True:
+            try:
+                from sync_api import fetch_and_sync_posts
+                add_log("🕒 Scheduled Auto-Sync Started", "system")
+                fetch_and_sync_posts()
+                add_log("✅ Scheduled Auto-Sync Completed", "system")
+            except Exception as e:
+                add_log(f"❌ Auto-Sync Error: {str(e)}", "error")
+            await asyncio.sleep(6 * 3600) # 6 hours
+
+    asyncio.create_task(auto_sync_loop())
+
+    # 2. Initial sync if empty
+    if count < 100:
         from sync_api import fetch_and_sync_posts
         add_log(f"🚀 Server starting - Initial sync initiated (Current count: {count})", "system")
         # Run in thread to not block startup

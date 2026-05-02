@@ -6,12 +6,28 @@ client = chromadb.PersistentClient(path="./chroma_data")
 collection = client.get_or_create_collection(name="products")
 
 def sync_product(product: dict):
-    product_str = f"{product.get('brand', '')} {product.get('name', '')} {product.get('category', '')} {product.get('color', '')} {product.get('sku', '')}"
+    """Sync a single product (legacy, use batch version for better performance)."""
+    sync_products_batch([product])
+
+def sync_products_batch(products: list):
+    """Sync multiple products in a single batch for high performance."""
+    if not products:
+        return
+        
+    documents = []
+    ids = []
+    metadatas = []
+    
+    for product in products:
+        product_str = f"{product.get('brand', '')} {product.get('name', '')} {product.get('category', '')} {product.get('color', '')} {product.get('sku', '')}"
+        documents.append(product_str)
+        ids.append(str(product['id']))
+        metadatas.append(product)
     
     collection.upsert(
-        documents=[product_str],
-        metadatas=[product],
-        ids=[str(product['id'])]
+        documents=documents,
+        metadatas=metadatas,
+        ids=ids
     )
 
 def normalize_query(query: str) -> str:

@@ -1,6 +1,6 @@
 import os
 import requests
-from database import sync_product
+from database import sync_products_batch
 from logger import add_log
 
 API_KEY = os.environ.get("FAROKHT_API_KEY", "a8f3c1d9b7e6f4c2a1d0b9c8e7f6a5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9")
@@ -26,6 +26,7 @@ def sync_page(page, limit):
         response = requests.get(url, headers=HEADERS, timeout=10)
         response.raise_for_status()
         items = response.json().get('data', [])
+        products_to_sync = []
         for item in items:
             product = {
                 'id': str(item.get('postId', '')),
@@ -37,7 +38,10 @@ def sync_page(page, limit):
                 'category': ', '.join([c.get('name', '') for c in item.get('categories', [])]) if item.get('categories') else '',
                 'image_url': item.get('image', '').replace('http://', 'https://') if item.get('image') else ''
             }
-            sync_product(product)
+            products_to_sync.append(product)
+        
+        if products_to_sync:
+            sync_products_batch(products_to_sync)
         count = len(items)
         if count > 0:
             add_log(f"✅ Synced page {page} ({count} items)", "sync")
