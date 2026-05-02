@@ -29,6 +29,7 @@ app.add_middleware(
 )
 
 @app.get("/", response_class=HTMLResponse)
+async def root():
     from sync_api import sync_status
     
     count = get_product_count()
