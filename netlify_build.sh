@@ -10,4 +10,4 @@ export PATH="$PATH:`pwd`/flutter/bin"
 # 2. Build the app
 cd app
 flutter pub get
-flutter build web --release
+flutter build web --release --web-renderer html

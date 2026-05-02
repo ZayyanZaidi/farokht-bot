@@ -35,7 +35,7 @@ def sync_page(page, limit):
                 'price': float(item.get('price') or item.get('sellingPrice') or item.get('regularPrice') or 0.0),
                 'color': ', '.join(item.get('colors', [])) if item.get('colors') else '',
                 'category': ', '.join([c.get('name', '') for c in item.get('categories', [])]) if item.get('categories') else '',
-                'image_url': item.get('image', '')
+                'image_url': item.get('image', '').replace('http://', 'https://') if item.get('image') else ''
             }
             sync_product(product)
         count = len(items)
