@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product.dart';
+import 'database_service.dart';
 
 class ApiService {
   // Default URL — updated after cloud deployment
@@ -72,7 +73,11 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (_) {}
-    return {'product_count': 0, 'categories': [], 'status': 'offline'};
+    
+    // Fallback to local DB
+    final count = await DatabaseService().getProductCount();
+    final categories = await DatabaseService().getCategoryCounts();
+    return {'product_count': count, 'categories': categories, 'status': 'offline'};
   }
 
   /// Fetch product catalog
@@ -81,12 +86,21 @@ class ApiService {
       final response = await http.get(Uri.parse('$_baseUrl/products?limit=$limit'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return (data['products'] as List)
+        final products = (data['products'] as List)
             .map((item) => Product.fromJson(item))
             .toList();
+            
+        // Save to local DB for persistence
+        if (products.isNotEmpty) {
+          await DatabaseService().saveProducts(products);
+        }
+        
+        return products;
       }
     } catch (_) {}
-    return [];
+    
+    // Fallback to local DB
+    return await DatabaseService().getAllProducts();
   }
 
   /// Trigger a background product sync on the backend

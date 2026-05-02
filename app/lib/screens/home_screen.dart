@@ -996,8 +996,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: _isOnline ? Colors.white.withOpacity(0.2) : Colors.red.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _isOnline ? Colors.white.withOpacity(0.3) : Colors.red.withOpacity(0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1010,9 +1011,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           Text(
-            _isOnline ? 'Online' : 'Offline',
+            _isOnline ? 'Online' : (_productCount > 0 ? 'Offline (Local)' : 'Offline'),
             style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
           ),
         ],

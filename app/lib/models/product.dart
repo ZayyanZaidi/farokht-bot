@@ -31,4 +31,17 @@ class Product {
       imageUrl: json['image_url'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'brand': brand,
+      'name': name,
+      'sku': sku,
+      'price': price,
+      'color': color,
+      'category': category,
+      'image_url': imageUrl,
+    };
+  }
 }
