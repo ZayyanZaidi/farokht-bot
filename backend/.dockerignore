@@ -1,0 +1,7 @@
+__pycache__/
+venv/
+*.pyc
+.git
+chroma_data/
+ollama_data/
+*.md

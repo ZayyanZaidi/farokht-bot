@@ -1,0 +1,172 @@
+import 'package:flutter/material.dart';
+
+enum AppLanguage { en, ur, urRoman, sd, ps, pa, bal }
+
+class LocalizationService {
+  static AppLanguage currentLanguage = AppLanguage.en;
+
+  static final Map<AppLanguage, Map<String, String>> _translations = {
+    AppLanguage.en: {
+      'app_title': 'Farokht Bot',
+      'hero_subtitle': 'Your smart shopping assistant 🛍️',
+      'hero_desc': 'Find the perfect products with just a chat',
+      'start_chat': 'Start Chat',
+      'browse': 'Browse',
+      'categories': 'Categories',
+      'available': 'available',
+      'live_activity': 'Live Activity',
+      'products': 'Products',
+      'languages': 'Languages',
+      'what_i_can_do': 'What I Can Do',
+      'smart_search_title': 'Smart Product Search',
+      'smart_search_desc': 'Ask me in your local language and I\'ll find the best matches',
+      'image_search_title': 'Image Search',
+      'image_search_desc': 'Upload a photo and I\'ll find similar products',
+      'personal_picks_title': 'Personalized Picks',
+      'personal_picks_desc': 'Get curated recommendations for you',
+      'greeting_init': 'Good morning!! 😃 How can I assist you today?',
+      'chat_hint': 'Type here your messages...',
+      'suggest_clothes': 'Clothes',
+      'suggest_kurtas': 'Kurtas',
+      'suggest_trending': 'Trending Now',
+    },
+    AppLanguage.ur: {
+      'app_title': 'فروخت بوٹ',
+      'hero_subtitle': 'آپ کا سمارٹ شاپنگ اسسٹنٹ 🛍️',
+      'hero_desc': 'صرف ایک چیٹ کے ساتھ بہترین مصنوعات تلاش کریں',
+      'start_chat': 'چیٹ شروع کریں',
+      'browse': 'براؤز کریں',
+      'categories': 'اقسام',
+      'available': 'دستیاب',
+      'live_activity': 'لائیو سرگرمی',
+      'products': 'مصنوعات',
+      'languages': 'زبانیں',
+      'what_i_can_do': 'میں کیا کر سکتا ہوں',
+      'smart_search_title': 'سمارٹ پروڈکٹ سرچ',
+      'smart_search_desc': 'اپنی مقامی زبان میں پوچھیں اور میں بہترین میچ تلاش کروں گا',
+      'image_search_title': 'تصویری تلاش',
+      'image_search_desc': 'فوٹو اپ لوڈ کریں اور میں ملتی جلتی مصنوعات تلاش کروں گا',
+      'personal_picks_title': 'ذاتی انتخاب',
+      'personal_picks_desc': 'اپنے لیے بہترین تجاویز حاصل کریں',
+      'greeting_init': 'السلام علیکم! 😃 میں آپ کی کیا مدد کر سکتا ہوں؟',
+      'chat_hint': 'اپنا پیغام یہاں لکھیں...',
+      'suggest_clothes': 'کپڑے',
+      'suggest_kurtas': 'کرتے',
+      'suggest_trending': 'مشہور چیزیں',
+    },
+    AppLanguage.sd: {
+      'app_title': 'فروخت بوٽ',
+      'hero_subtitle': 'توھان جو سمارٽ شاپنگ اسسٽنٽ 🛍️',
+      'hero_desc': 'صرف ھڪڙي چيٽ سان بھترين پراڊڪٽس ڳوليو',
+      'start_chat': 'چيٽ شروع ڪريو',
+      'browse': 'براؤز ڪريو',
+      'categories': 'قسمون',
+      'available': 'دستياب',
+      'live_activity': 'لائيو سرگرمي',
+      'products': 'پراڊڪٽس',
+      'languages': 'ٻوليون',
+      'what_i_can_do': 'مان ڇا ڪري سگھان ٿو',
+      'smart_search_title': 'سمارٽ پراڊڪٽ سرچ',
+      'smart_search_desc': 'پنهنجي مقامي ٻولي ۾ پڇو ۽ مان بهترين ميچ ڳوليندس',
+      'image_search_title': 'تصويري ڳولا',
+      'image_search_desc': 'فوٽو اپ لوڊ ڪريو ۽ مان ملندڙ جلندڙ پراڊڪٽس ڳوليندس',
+      'personal_picks_title': 'ذاتي چونڊ',
+      'personal_picks_desc': 'پنهنجي لاءِ بهترين تجويزون حاصل ڪريو',
+      'greeting_init': 'اسلام عليڪم! 😃 مان توهان جي ڪهڙي مدد ڪري سگهان ٿو؟',
+      'chat_hint': 'پنهنجو پيغام هتي لکو...',
+      'suggest_clothes': 'کپڙا',
+      'suggest_kurtas': 'ڪرتا',
+      'suggest_trending': 'مشهور مصنوعات',
+    },
+    AppLanguage.ps: {
+      'app_title': 'فروخت بوټ',
+      'hero_subtitle': 'ستاسو سمارټ شاپنگ اسسټنټ 🛍️',
+      'hero_desc': 'صرف په یو چټ کې غوره محصولات ومومئ',
+      'start_chat': 'چټ پیل کړئ',
+      'browse': 'براوز کړئ',
+      'categories': 'کټګورۍ',
+      'available': 'دستیاب',
+      'live_activity': 'ژوندۍ فعالیت',
+      'products': 'محصولات',
+      'languages': 'ژبې',
+      'what_i_can_do': 'زه څه کولی شم',
+      'smart_search_title': 'سمارټ پروډکټ لټون',
+      'smart_search_desc': 'په خپله سیمه ییزه ژبه کې وپوښتئ او زه به غوره میچونه ومومم',
+      'image_search_title': 'انځور لټون',
+      'image_search_desc': 'یو عکس اپلوډ کړئ او زه به ورته محصولات ومومم',
+      'personal_picks_title': 'شخصي انتخابونه',
+      'personal_picks_desc': 'ستاسو لپاره غوره وړاندیزونه ترلاسه کړئ',
+      'greeting_init': 'اسلام علیکم! 😃 زه څنګه ستاسو سره مرسته کولی شم؟',
+      'chat_hint': 'خپل پیغام دلته ولیکئ...',
+    },
+    AppLanguage.pa: {
+      'app_title': 'فروخت بوٹ',
+      'hero_subtitle': 'تہاڈا سمارٹ شاپنگ اسسٹنٹ 🛍️',
+      'hero_desc': 'صرف اک چیٹ نال بہترین چیزاں لبھو',
+      'start_chat': 'چیٹ شروع کرو',
+      'browse': 'براؤز کرو',
+      'categories': 'قسماں',
+      'available': 'دستیاب',
+      'live_activity': 'لائیو سرگرمی',
+      'products': 'مصنوعات',
+      'languages': 'بولیاں',
+      'what_i_can_do': 'میں کی کر سکدا واں',
+      'smart_search_title': 'سمارٹ پروڈکٹ سرچ',
+      'smart_search_desc': 'اپنی مقامی بولی وچ پچھو تے میں بہترین میچ لبھاں گا',
+      'image_search_title': 'تصویری تلاش',
+      'image_search_desc': 'فوٹو اپ لوڈ کرو تے میں ملدی جلدی چیزاں لبھاں گا',
+      'personal_picks_title': 'ذاتی انتخاب',
+      'personal_picks_desc': 'اپنے لئی بہترین تجاویز حاصل کرو',
+      'greeting_init': 'ست سری اکال! 😃 میں تہاڈی کی مدد کر سکدا واں؟',
+      'chat_hint': 'اپنا پیغام ایتھے لکھو...',
+      'suggest_clothes': 'کپڑے',
+      'suggest_kurtas': 'کرتے',
+      'suggest_trending': 'مشہور چیزاں',
+    },
+    AppLanguage.bal: {
+      'app_title': 'فروخت بوٹ',
+      'hero_subtitle': 'شمئے سمارٹ شاپنگ اسسٹنٹ 🛍️',
+      'hero_desc': 'گوں یک چیٹءَ گہتریں چیزاں شوہاز کن ات',
+      'start_chat': 'چیٹ بنا کن',
+      'browse': 'براؤز کن',
+      'categories': 'بہر',
+      'available': 'دستیاب',
+      'live_activity': 'زندگیں سرگرمی',
+      'products': 'چیزاں',
+      'languages': 'زباناں',
+      'what_i_can_do': 'من چے کُت کناں',
+      'smart_search_title': 'سمارٹ چیز شوہاز',
+      'smart_search_desc': 'وتی میتگی زبانءَ جست کن ات من گہتریں چیزاں شوہاز کناں',
+      'image_search_title': 'عکس شوہاز',
+      'image_search_desc': 'عکسءَ اپلوڈ کن ات من ہمے وڑیں چیزاں شوہاز کناں',
+      'personal_picks_title': 'وتی گچین',
+      'personal_picks_desc': 'وتی واستہ گہتریں تجاویز بگر ات',
+      'greeting_init': 'السلام علیکم! 😃 من شمئے چے کمک کُت کناں؟',
+      'chat_hint': 'وتی کلوہءَ ادا بنویس ات...',
+      'suggest_clothes': 'پوشاک',
+      'suggest_kurtas': 'کرتہ',
+      'suggest_trending': 'نودربریں چیزاں',
+    },
+    // Add more translations as needed
+  };
+
+  static String tr(String key) {
+    return _translations[currentLanguage]?[key] ?? _translations[AppLanguage.en]![key]!;
+  }
+
+  static bool isRtl() {
+    return [AppLanguage.ur, AppLanguage.sd, AppLanguage.ps, AppLanguage.bal].contains(currentLanguage);
+  }
+
+  static String getLangCode() {
+    switch (currentLanguage) {
+      case AppLanguage.en: return 'en';
+      case AppLanguage.ur: return 'ur';
+      case AppLanguage.urRoman: return 'ur_roman';
+      case AppLanguage.sd: return 'sd';
+      case AppLanguage.ps: return 'ps';
+      case AppLanguage.pa: return 'pa';
+      case AppLanguage.bal: return 'bal';
+    }
+  }
+}
