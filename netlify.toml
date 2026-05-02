@@ -1,0 +1,13 @@
+[build]
+  publish = "app/build/web"
+  command = "bash netlify_build.sh"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  FLUTTER_VERSION = "stable"
+  # This requires a build script to install flutter if not present
+  # or using a specialized build image.
