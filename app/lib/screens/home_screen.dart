@@ -40,9 +40,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
   }
 
   void _startAutoRefresh() {
@@ -64,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _loadStats({bool isAuto = false}) async {
-    if (!isAuto && mounted) setState(() => _isLoading = true);
+    if (!isAuto && mounted) setState(() {});
     
     try {
       bool healthy = false;
@@ -105,17 +102,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           _isOnline = healthy || products.isNotEmpty || stats['status'] == 'healthy';
           _productCount = stats['product_count'] ?? 0;
           _allProducts = products;
-          _featuredProducts = products.take(5).toList();
           _categories = cats;
-          _isLoading = false;
-          _lastUpdated = DateTime.now();
         });
       }
     } catch (e) {
       print('HomeScreen: Unexpected error in _loadStats: $e');
       if (mounted) setState(() {
         _isOnline = false;
-        _isLoading = false;
       });
     }
   }
