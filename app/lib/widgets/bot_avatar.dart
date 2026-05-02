@@ -27,7 +27,7 @@ class BotAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.15),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF5CE1E6).withOpacity(0.3),
+            color: const Color(0xFF5CE1E6).withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -156,7 +156,7 @@ class BotAvatar extends StatelessWidget {
               height: size * 0.08,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
           ),

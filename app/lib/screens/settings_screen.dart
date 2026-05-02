@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/api_service.dart';
 import '../services/localization_service.dart';
 import '../main.dart';
-
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback? onClearChat;
@@ -77,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           bottomRight: Radius.circular(40),
         ),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF5CE1E6).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: const Color(0xFF5CE1E6).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Column(
@@ -91,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 6),
           Text(
             'Personalize your Farokht Assistant',
-            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
           ),
         ],
       ),
@@ -176,17 +174,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             gradient: isSelected
                 ? const LinearGradient(colors: [Color(0xFF5CE1E6), Color(0xFFFF8C00)])
                 : null,
-            color: isSelected ? null : Colors.grey.withOpacity(0.05),
+            color: isSelected ? null : Colors.grey.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(15),
             boxShadow: isSelected ? [
-              BoxShadow(color: const Color(0xFF5CE1E6).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+              BoxShadow(color: const Color(0xFF5CE1E6).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
             ] : [],
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 fontSize: 12,
               ),
@@ -276,7 +274,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF5CE1E6).withOpacity(0.1),
+                    color: const Color(0xFF5CE1E6).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.info_outline_rounded, color: Color(0xFF5CE1E6), size: 20),
@@ -292,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.delete_sweep_rounded, color: Colors.red, size: 20),

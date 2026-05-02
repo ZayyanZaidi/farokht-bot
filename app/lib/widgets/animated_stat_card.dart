@@ -69,7 +69,7 @@ class _AnimatedStatCardState extends State<AnimatedStatCard> with SingleTickerPr
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: widget.color.withOpacity(0.1),
+                    color: widget.color.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(widget.icon, color: widget.color, size: 22),
@@ -94,7 +94,7 @@ class _AnimatedStatCardState extends State<AnimatedStatCard> with SingleTickerPr
                   widget.label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
                     fontWeight: FontWeight.w500,
                   ),
                 ),

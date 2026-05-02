@@ -16,7 +16,7 @@ class ApiService {
   static Future<void> init() async {
     // We now enforce the cloud backend URL to ensure direct data loading
     _baseUrl = _defaultUrl;
-    print('ApiService: Initialized with backend URL: $_baseUrl');
+    debugPrint('ApiService: Initialized with backend URL: $_baseUrl');
   }
 
   /// Update and persist the server URL
@@ -69,15 +69,15 @@ class ApiService {
   /// Fetch stats (product count + categories) for the home screen
   static Future<Map<String, dynamic>> getStats() async {
     try {
-      print('ApiService: Fetching stats from $_baseUrl/stats');
+      debugPrint('ApiService: Fetching stats from $_baseUrl/stats');
       final response = await http.get(Uri.parse('$_baseUrl/stats'))
           .timeout(const Duration(seconds: 15));
-      print('ApiService: Stats response code: ${response.statusCode}');
+      debugPrint('ApiService: Stats response code: ${response.statusCode}');
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('ApiService: Stats error: $e');
+      debugPrint('ApiService: Stats error: $e');
     }
     
     // Fallback to local DB
@@ -89,10 +89,10 @@ class ApiService {
   /// Fetch product catalog
   static Future<List<Product>> getProducts({int limit = 10}) async {
     try {
-      print('ApiService: Fetching products from $_baseUrl/products?limit=$limit');
+      debugPrint('ApiService: Fetching products from $_baseUrl/products?limit=$limit');
       final response = await http.get(Uri.parse('$_baseUrl/products?limit=$limit'))
           .timeout(const Duration(seconds: 15));
-      print('ApiService: Products response code: ${response.statusCode}');
+      debugPrint('ApiService: Products response code: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> prodList = data['products'] ?? [];
@@ -100,18 +100,18 @@ class ApiService {
             .map((item) => Product.fromJson(item))
             .toList();
             
-        print('ApiService: Loaded ${products.length} products');
+        debugPrint('ApiService: Loaded ${products.length} products');
         // Save to local DB for persistence (in background, don't block return)
         if (products.isNotEmpty) {
           DatabaseService().saveProducts(products).catchError((e) {
-            print('ApiService: Background save failed: $e');
+            debugPrint('ApiService: Background save failed: $e');
           });
         }
         
         return products;
       }
     } catch (e) {
-      print('ApiService: Products fetch error: $e');
+      debugPrint('ApiService: Products fetch error: $e');
     }
     
     // Fallback to local DB
@@ -153,16 +153,16 @@ class ApiService {
   /// Fetch live activity logs
   static Future<List<Map<String, dynamic>>> getLiveActivity() async {
     try {
-      print('ApiService: Fetching activity from $_baseUrl/live_activity');
+      debugPrint('ApiService: Fetching activity from $_baseUrl/live_activity');
       final response = await http.get(Uri.parse('$_baseUrl/live_activity'))
           .timeout(const Duration(seconds: 15));
-      print('ApiService: Activity response code: ${response.statusCode}');
+      debugPrint('ApiService: Activity response code: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return List<Map<String, dynamic>>.from(data['logs'] ?? []);
       }
     } catch (e) {
-      print('ApiService: Activity error: $e');
+      debugPrint('ApiService: Activity error: $e');
     }
     return [];
   }

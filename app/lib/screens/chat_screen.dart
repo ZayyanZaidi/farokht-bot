@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../services/localization_service.dart';
@@ -26,7 +25,6 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Initial greeting based on current language
     _messages.add(
       ChatMessage(
         text: LocalizationService.tr('greeting_init'),
@@ -107,7 +105,6 @@ class ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty && imagePath == null) return;
 
     _textController.clear();
-    
     File? imageFile = imagePath != null ? File(imagePath) : null;
 
     setState(() {
@@ -122,7 +119,6 @@ class ChatScreenState extends State<ChatScreen> {
     
     _scrollToBottom();
 
-    // Show searching indicator message
     final searchingMsgIndex = _messages.length;
     setState(() {
       _messages.add(ChatMessage(
@@ -140,10 +136,9 @@ class ChatScreenState extends State<ChatScreen> {
       final response = await ApiService.sendMessage(text, imageFile, lang: lang);
       
       setState(() {
-        // Remove searching message
-        _messages.removeAt(searchingMsgIndex);
-        
-        // Add actual response
+        if (_messages.length > searchingMsgIndex) {
+          _messages.removeAt(searchingMsgIndex);
+        }
         _messages.add(ChatMessage(
           text: response['reply'],
           isUser: false,
@@ -155,7 +150,9 @@ class ChatScreenState extends State<ChatScreen> {
       _scrollToBottom();
     } catch (e) {
       setState(() {
-        _messages.removeAt(searchingMsgIndex);
+        if (_messages.length > searchingMsgIndex) {
+          _messages.removeAt(searchingMsgIndex);
+        }
         _messages.add(ChatMessage(
           text: "Error connecting to server.",
           isUser: false,
@@ -175,13 +172,12 @@ class ChatScreenState extends State<ChatScreen> {
       textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: Colors.white.withOpacity(0.1),
+          backgroundColor: Colors.white.withValues(alpha: 0.1),
           flexibleSpace: ClipRRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(color: Colors.white.withOpacity(0.05)),
+              child: Container(color: Colors.white.withValues(alpha: 0.05)),
             ),
           ),
           elevation: 0,
@@ -222,7 +218,7 @@ class ChatScreenState extends State<ChatScreen> {
                       Text(
                         "Always here to help",
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), 
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), 
                           fontSize: 10
                         ),
                       ),
@@ -239,54 +235,44 @@ class ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
-        body: Stack(
-          children: [
-            // 1. Base Gradient (Adaptive)
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: Theme.of(context).brightness == Brightness.light
-                      ? [const Color(0xFFF8FAFC), const Color(0xFFE2E8F0)]
-                      : [const Color(0xFF0F172A), const Color(0xFF1E293B)],
-                ),
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: Theme.of(context).brightness == Brightness.light
+                  ? [const Color(0xFFF8FAFC), const Color(0xFFE2E8F0)]
+                  : [const Color(0xFF0F172A), const Color(0xFF1E293B)],
             ),
-            // 2. Decorative Floating Orbs
-            _buildOrb(top: -100, right: -100, size: 300, color: const Color(0xFF5CE1E6).withOpacity(0.1)),
-            _buildOrb(bottom: 200, left: -100, size: 350, color: const Color(0xFFFF8C00).withOpacity(0.08)),
-            
-            // 3. The Actual Content
-            SafeArea(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        return ChatBubble(message: _messages[index]);
-                      },
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      return ChatBubble(message: _messages[index]);
+                    },
+                  ),
+                ),
+                if (_isTyping)
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.transparent,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        const Color(0xFF5CE1E6).withValues(alpha: 0.3),
+                      ),
                     ),
                   ),
-                  _buildMessageInput(),
-                ],
-              ),
+                _buildMessageInput(),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildOrb({double? top, double? bottom, double? left, double? right, required double size, required Color color}) {
-    return Positioned(
-      top: top, bottom: bottom, left: left, right: right,
-      child: Container(
-        width: size, height: size,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       ),
     );
   }
@@ -301,9 +287,9 @@ class ChatScreenState extends State<ChatScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor.withOpacity(0.8),
+              color: Theme.of(context).cardColor.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Row(
               children: [
@@ -317,7 +303,7 @@ class ChatScreenState extends State<ChatScreen> {
                     style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: LocalizationService.tr('chat_hint'),
-                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
+                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
@@ -333,7 +319,7 @@ class ChatScreenState extends State<ChatScreen> {
                       gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)]),
                       shape: BoxShape.circle,
                       boxShadow: [
-                        BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4)),
+                        BoxShadow(color: const Color(0xFFFF8C00).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4)),
                       ],
                     ),
                     child: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 22),

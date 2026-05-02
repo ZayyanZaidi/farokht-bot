@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 enum AppLanguage { en, ur, urRoman, sd, ps, pa, bal }
 
 class LocalizationService {

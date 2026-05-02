@@ -44,7 +44,7 @@ class Particle {
   double y = Random().nextDouble();
   double size = Random().nextDouble() * 40 + 10;
   double speed = Random().nextDouble() * 0.02 + 0.005;
-  Color color = Random().nextBool() ? const Color(0xFF5CE1E6).withOpacity(0.1) : const Color(0xFFFF8C00).withOpacity(0.1);
+  Color color = Random().nextBool() ? const Color(0xFF5CE1E6).withValues(alpha: 0.1) : const Color(0xFFFF8C00).withValues(alpha: 0.1);
 }
 
 class ParticlePainter extends CustomPainter {

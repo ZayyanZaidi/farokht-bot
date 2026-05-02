@@ -41,7 +41,7 @@ class ChatBubble extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -79,7 +79,7 @@ class ChatBubble extends StatelessWidget {
                           message.timestamp,
                           style: TextStyle(
                             color: isUser 
-                                ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6) 
+                                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6) 
                                 : Colors.white70,
                             fontSize: 10,
                           ),

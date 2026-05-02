@@ -5,7 +5,6 @@ import 'screens/app_nav_shell.dart';
 import 'services/api_service.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
@@ -16,17 +15,17 @@ void main() async {
   if (!kIsWeb) {
     try {
       if (Platform.isWindows || Platform.isLinux) {
-        print('Main: Initializing sqflite_common_ffi for Desktop');
+        debugPrint('Main: Initializing sqflite_common_ffi for Desktop');
         sqfliteFfiInit();
         databaseFactory = databaseFactoryFfi;
       }
     } catch (e) {
-      print('Main: Desktop DB initialization skipped or failed: $e');
+      debugPrint('Main: Desktop DB initialization skipped or failed: $e');
     }
   }
   
   await ApiService.init();
-  print('Main: ApiService initialized');
+  debugPrint('Main: ApiService initialized');
   
   final prefs = await SharedPreferences.getInstance();
   final isDark = prefs.getBool('is_dark_mode') ?? false;

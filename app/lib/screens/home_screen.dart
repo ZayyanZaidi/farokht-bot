@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/localization_service.dart';
 import '../models/product.dart';
-import '../widgets/animated_stat_card.dart';
 import '../widgets/animated_background.dart';
-import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onStartChat;
@@ -21,15 +19,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int _productCount = 0;
   List<Map<String, dynamic>> _categories = [];
   bool _isOnline = false;
-  bool _isLoading = true;
-  List<Map<String, dynamic>> _logs = [];
   Timer? _refreshTimer;
-  DateTime _lastUpdated = DateTime.now();
   late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
 
   // State for products
-  List<Product> _featuredProducts = [];
   List<Product> _allProducts = [];
 
   @override
@@ -114,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           _allProducts = products;
           _featuredProducts = products.take(5).toList();
           _categories = cats;
-          _logs = logs;
           _isLoading = false;
           _lastUpdated = DateTime.now();
         });
@@ -150,7 +142,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 _buildHeroSliderSliver(),
                 _buildCategoriesSliver(),
                 _buildProductGridSliver(),
-                _buildLiveActivitySliver(),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
@@ -174,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFF5CE1E6).withOpacity(0.2), 
+                const Color(0xFF5CE1E6).withValues(alpha: 0.2), 
                 const Color(0xFF5CE1E6).withOpacity(0)
               ],
             ),
@@ -186,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFF5CE1E6).withOpacity(0.2)),
+            border: Border.all(color: const Color(0xFF5CE1E6).withValues(alpha: 0.2)),
             boxShadow: [
               BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4)),
             ],
@@ -266,10 +257,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         image: DecorationImage(
           image: NetworkImage(imageUrl),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken),
+          colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.8), BlendMode.darken),
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 15, offset: const Offset(0, 8)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 15, offset: const Offset(0, 8)),
         ],
       ),
       child: Stack(
@@ -282,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               children: [
                 Text(title, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14)),
+                Text(subtitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
               ],
             ),
           ),
@@ -294,9 +285,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
                 ),
                 child: const Icon(Icons.shopping_bag_rounded, color: Colors.white, size: 30),
               ),
@@ -346,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             children: [
               const Icon(Icons.inventory_2_outlined, color: Colors.grey, size: 60),
               const SizedBox(height: 16),
-              Text('Searching for products...', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
+              Text('Searching for products...', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
             ],
           ),
         ),
@@ -381,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor.withOpacity(Theme.of(context).brightness == Brightness.light ? 0.9 : 0.08),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+                  border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1)),
                   boxShadow: Theme.of(context).brightness == Brightness.light 
                     ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]
                     : [],
@@ -454,12 +445,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildLiveActivitySliver() {
-    return SliverToBoxAdapter(
-      child: _buildLiveActivitySection(),
-    );
-  }
-
   Widget _categoryChip(String name, int count) {
     final Map<String, IconData> categoryIcons = {
       'kurta': Icons.checkroom,
@@ -498,9 +483,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ? Colors.white 
             : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
           boxShadow: Theme.of(context).brightness == Brightness.light 
-            ? [BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]
+            ? [BoxShadow(color: color.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))]
             : [],
         ),
         child: Column(
@@ -509,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 24),
@@ -523,525 +508,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             Text(
               '$count items',
-              style: TextStyle(fontSize: 9, color: Colors.white.withOpacity(0.5)),
+              style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.5)),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatsRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          AnimatedStatCard(
-            icon: Icons.inventory_2_outlined,
-            label: LocalizationService.tr('products'),
-            value: _productCount,
-            color: const Color(0xFF5CE1E6),
-          ),
-          const SizedBox(width: 16),
-          AnimatedStatCard(
-            icon: Icons.category_outlined,
-            label: LocalizationService.tr('categories'),
-            value: _categories.length,
-            color: const Color(0xFFFF8C00),
-          ),
-          const SizedBox(width: 16),
-          AnimatedStatCard(
-            icon: Icons.language,
-            label: LocalizationService.tr('languages'),
-            value: 7,
-            color: const Color(0xFF9C27B0),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(Theme.of(context).brightness == Brightness.light ? 0.15 : 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 22),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActions(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: GestureDetector(
-              onTap: widget.onStartChat,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF8C00).withOpacity(0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 22),
-                    const SizedBox(width: 10),
-                    Text(
-                      LocalizationService.tr('start_chat'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: GestureDetector(
-              onTap: () {
-                if (widget.onCategoryTap != null) {
-                  widget.onCategoryTap!('');
-                }
-                widget.onStartChat();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF5CE1E6), width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF5CE1E6).withOpacity(0.15),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.explore_outlined, color: Color(0xFF5CE1E6), size: 22),
-                    const SizedBox(width: 8),
-                    Text(
-                      LocalizationService.tr('browse'),
-                      style: const TextStyle(
-                        color: Color(0xFF5CE1E6),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategorySection() {
-    final categoryIcons = <String, IconData>{
-      'kurta': Icons.checkroom,
-      'bag': Icons.shopping_bag_outlined,
-      'dessert': Icons.cake_outlined,
-      'snack': Icons.fastfood_outlined,
-      'shoes': Icons.directions_walk,
-      'jewelry': Icons.diamond_outlined,
-      'cosmetics': Icons.brush_outlined,
-    };
-
-    final categoryColors = <String, Color>{
-      'kurta': const Color(0xFFE91E63),
-      'bag': const Color(0xFF9C27B0),
-      'dessert': const Color(0xFFFF5722),
-      'snack': const Color(0xFF4CAF50),
-      'shoes': const Color(0xFF2196F3),
-      'jewelry': const Color(0xFFFFD700),
-      'cosmetics': const Color(0xFFE91E63),
-    };
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                LocalizationService.tr('categories'),
-                style: TextStyle(
-                  fontSize: 18, 
-                  fontWeight: FontWeight.bold, 
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              Text(
-                '${_categories.length} ${LocalizationService.tr('available')}',
-                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 140,
-          child: _categories.isEmpty
-              ? Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _isLoading ? 'Fetching stats...' : 'No products in database',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Pull down to refresh catalog',
-                        style: TextStyle(color: Colors.white54, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    final cat = _categories[index];
-                    final name = cat['name'] as String;
-                    final count = cat['count'] ?? 0;
-                    final color = categoryColors[name.toLowerCase()] ?? const Color(0xFF5CE1E6);
-                    final icon = categoryIcons[name.toLowerCase()] ?? Icons.label_outline;
-
-                    return GestureDetector(
-                      onTap: () {
-                        if (widget.onCategoryTap != null) {
-                          widget.onCategoryTap!(name);
-                        }
-                      },
-                      child: Container(
-                        width: 85,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: color.withOpacity(Theme.of(context).brightness == Brightness.light ? 0.15 : 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: color.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(icon, color: color, size: 24),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              name,
-                              style: TextStyle(
-                                fontSize: 11, 
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              '$count items',
-                              style: TextStyle(
-                                fontSize: 9, 
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFeatureCards() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            LocalizationService.tr('what_i_can_do'),
-            style: TextStyle(
-              fontSize: 18, 
-              fontWeight: FontWeight.bold, 
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _featureCard(
-            icon: Icons.search_rounded,
-            title: LocalizationService.tr('smart_search_title'),
-            subtitle: LocalizationService.tr('smart_search_desc'),
-            gradient: const [Color(0xFF5CE1E6), Color(0xFF3DC8CD)],
-          ),
-          const SizedBox(height: 12),
-          _featureCard(
-            icon: Icons.camera_alt_rounded,
-            title: LocalizationService.tr('image_search_title'),
-            subtitle: LocalizationService.tr('image_search_desc'),
-            gradient: const [Color(0xFFFF8C00), Color(0xFFFF6B00)],
-          ),
-          const SizedBox(height: 12),
-          _featureCard(
-            icon: Icons.recommend_rounded,
-            title: LocalizationService.tr('personal_picks_title'),
-            subtitle: LocalizationService.tr('personal_picks_desc'),
-            gradient: const [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _featureCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required List<Color> gradient,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: gradient),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: gradient[0].withOpacity(0.25),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: Colors.white, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLiveActivitySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                LocalizationService.tr('live_activity'),
-                style: TextStyle(
-                  fontSize: 18, 
-                  fontWeight: FontWeight.bold, 
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              _isOnline 
-                ? Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle))
-                : const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          height: 180,
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.05)),
-          ),
-          child: _logs.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.sync_problem_rounded, color: Colors.grey[400], size: 30),
-                      const SizedBox(height: 8),
-                      Text(
-                        _isLoading ? 'Fetching activity...' : 'Server unreachable',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 13),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: _logs.length,
-                  separatorBuilder: (context, index) => Divider(color: Colors.grey.withOpacity(0.05), height: 1),
-                  itemBuilder: (context, index) {
-                    final log = _logs[index];
-                    final type = log['type'] ?? 'info';
-                    final color = type == 'error' ? Colors.red : (type == 'chat' ? const Color(0xFF5CE1E6) : const Color(0xFFFF8C00));
-                    final icon = type == 'chat' ? Icons.chat_bubble_outline : (type == 'sync' ? Icons.sync : Icons.info_outline);
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(icon, color: color, size: 14),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  log['event'] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                                Text(
-                                  log['time'] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[500],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
     );
   }
 
@@ -1049,9 +520,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _isOnline ? Colors.white.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+        color: _isOnline ? Colors.white.withValues(alpha: 0.2) : Colors.red.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _isOnline ? Colors.white.withOpacity(0.3) : Colors.red.withOpacity(0.5)),
+        border: Border.all(color: _isOnline ? Colors.white.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1102,7 +573,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white : Colors.white.withOpacity(0.2),
+                color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Center(

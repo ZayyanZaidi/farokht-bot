@@ -39,7 +39,7 @@ class ProductCarousel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.light ? 0.05 : 0.2),
+                      color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.light ? 0.05 : 0.2),
                       blurRadius: 5,
                       offset: const Offset(0, 2),
                     ),
@@ -132,9 +132,9 @@ class ProductCarousel extends StatelessWidget {
                                 color: const Color(0xFFFF8C00),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 14),
                                   SizedBox(width: 6),
                                   Text(

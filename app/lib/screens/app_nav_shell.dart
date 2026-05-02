@@ -53,16 +53,16 @@ class _AppNavShellState extends State<AppNavShell> {
         height: 85,
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor.withOpacity(0.9),
+          color: Theme.of(context).cardColor.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF5CE1E6).withOpacity(0.15),
+              color: const Color(0xFF5CE1E6).withValues(alpha: 0.15),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
           ],
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
@@ -82,7 +82,7 @@ class _AppNavShellState extends State<AppNavShell> {
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _currentIndex == 0 ? const Color(0xFFFF8C00).withOpacity(0.1) : Colors.transparent,
+                    color: _currentIndex == 0 ? const Color(0xFFFF8C00).withValues(alpha: 0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(_currentIndex == 0 ? Icons.home_rounded : Icons.home_outlined),
@@ -94,7 +94,7 @@ class _AppNavShellState extends State<AppNavShell> {
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _currentIndex == 1 ? const Color(0xFFFF8C00).withOpacity(0.1) : Colors.transparent,
+                    color: _currentIndex == 1 ? const Color(0xFFFF8C00).withValues(alpha: 0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(_currentIndex == 1 ? Icons.chat_bubble_rounded : Icons.chat_bubble_outline),
@@ -106,7 +106,7 @@ class _AppNavShellState extends State<AppNavShell> {
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _currentIndex == 2 ? const Color(0xFFFF8C00).withOpacity(0.1) : Colors.transparent,
+                    color: _currentIndex == 2 ? const Color(0xFFFF8C00).withValues(alpha: 0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(_currentIndex == 2 ? Icons.settings_rounded : Icons.settings_outlined),
