@@ -3,21 +3,28 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/app_nav_shell.dart';
 import 'services/api_service.dart';
-import 'dart:io';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 import 'package:sqflite/sqflite.dart';
-
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  if (Platform.isWindows || Platform.isLinux) {
-    print('Main: Initializing sqflite_common_ffi for Desktop');
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+  if (!kIsWeb) {
+    try {
+      if (Platform.isWindows || Platform.isLinux) {
+        print('Main: Initializing sqflite_common_ffi for Desktop');
+        sqfliteFfiInit();
+        databaseFactory = databaseFactoryFfi;
+      }
+    } catch (e) {
+      print('Main: Desktop DB initialization skipped or failed: $e');
+    }
   }
+  
   await ApiService.init();
   print('Main: ApiService initialized');
   
