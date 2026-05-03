@@ -73,9 +73,12 @@ class ApiService {
       debugPrint('ApiService: Fetching stats from $_baseUrl/stats');
       final response = await http.get(Uri.parse('$_baseUrl/stats'))
           .timeout(const Duration(seconds: 15));
-      debugPrint('ApiService: Stats response code: ${response.statusCode}');
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+        // Only return if it actually contains data, otherwise fallback
+        if ((data['product_count'] ?? 0) > 0) {
+          return data;
+        }
       }
     } catch (e) {
       debugPrint('ApiService: Stats error: $e');
@@ -93,7 +96,6 @@ class ApiService {
       debugPrint('ApiService: Fetching products from $_baseUrl/products?limit=$limit');
       final response = await http.get(Uri.parse('$_baseUrl/products?limit=$limit'))
           .timeout(const Duration(seconds: 15));
-      debugPrint('ApiService: Products response code: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> prodList = data['products'] ?? [];
@@ -101,15 +103,14 @@ class ApiService {
             .map((item) => Product.fromJson(item))
             .toList();
             
-        debugPrint('ApiService: Loaded ${products.length} products');
-        // Save to local DB for persistence (in background, don't block return)
         if (products.isNotEmpty) {
+          debugPrint('ApiService: Loaded ${products.length} products');
+          // Save to local DB for persistence
           DatabaseService().saveProducts(products).catchError((e) {
             debugPrint('ApiService: Background save failed: $e');
           });
+          return products;
         }
-        
-        return products;
       }
     } catch (e) {
       debugPrint('ApiService: Products fetch error: $e');

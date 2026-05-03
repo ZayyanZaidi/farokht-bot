@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         _loadStats();
-        _startAutoRefresh();
+        // _startAutoRefresh(); // Removed aggressive 10s refresh to prevent data disappearing
       }
     });
 
