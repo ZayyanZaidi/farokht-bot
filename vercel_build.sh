@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
+export BOT=true
 if [ ! -d "flutter" ]; then
   git clone https://github.com/flutter/flutter.git -b stable --depth 1
 fi
 export PATH="$PATH:`pwd`/flutter/bin"
+flutter config --no-analytics
 flutter --version
 cd app
 flutter pub get
