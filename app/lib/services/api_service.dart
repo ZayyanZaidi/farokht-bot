@@ -8,7 +8,7 @@ import 'database_service.dart';
 
 class ApiService {
   // Default URL — updated after cloud deployment
-  static const String _defaultUrl = 'https://farokht-bot-backend-784756226072.us-central1.run.app';
+  static const String _defaultUrl = String.fromEnvironment('BACKEND_URL', defaultValue: 'https://farokht-bot-backend-784756226072.us-central1.run.app');
   static String _baseUrl = _defaultUrl;
 
   static String get baseUrl => _baseUrl;
