@@ -1,8 +1,9 @@
 import chromadb
 from chromadb.config import Settings
 import re
-
-client = chromadb.PersistentClient(path="./chroma_data")
+import os
+CHROMA_DATA_PATH = os.environ.get("CHROMA_DATA_PATH", "./chroma_data")
+client = chromadb.PersistentClient(path=CHROMA_DATA_PATH)
 collection = client.get_or_create_collection(name="products")
 
 def sync_product(product: dict):
