@@ -3,6 +3,8 @@ from chromadb.config import Settings
 import re
 import os
 CHROMA_DATA_PATH = os.environ.get("CHROMA_DATA_PATH", "./chroma_data")
+if not os.path.exists(CHROMA_DATA_PATH):
+    os.makedirs(CHROMA_DATA_PATH, exist_ok=True)
 client = chromadb.PersistentClient(path=CHROMA_DATA_PATH)
 collection = client.get_or_create_collection(name="products")
 
