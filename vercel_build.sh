@@ -6,6 +6,7 @@ if [ ! -d "flutter" ]; then
 fi
 export PATH="$PATH:`pwd`/flutter/bin"
 flutter config --no-analytics
+flutter config --enable-web
 flutter --version
 cd app
 flutter pub get
